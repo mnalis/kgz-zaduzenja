@@ -42,9 +42,8 @@ $DEBUG > 2 && say $mech->content();
 
 use HTML::TreeBuilder::XPath;
 my $tree= HTML::TreeBuilder::XPath->new;
-#$tree->parse_content( $mech->content() );
-# DEBUG -- 
-open my $debug_fh, '<:encoding(UTF-8)', './samples/example.html' || die "Can't open UTF-8 encoded ./a: $!"; $tree->parse_file( $debug_fh );
+$tree->parse_content( $mech->content() );
+# DEBUG -- open my $debug_fh, '<:encoding(UTF-8)', './samples/example.html' || die "Can't open UTF-8 encoded ./a: $!"; $tree->parse_file( $debug_fh );
 
 
 # check if expected headers match

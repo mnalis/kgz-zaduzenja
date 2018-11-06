@@ -4,4 +4,3 @@
 - param za koliko dana unaprijed da se zali (trenutno hardcoded)
 - stavi da se vrti u cron.daily
 - obrisi password ASAP iz cmdline i/ili opcija za citanje iz file-a (security)
-- delta_days() ne radi sto zelim: now=2018-11-06, istek=2020-11-26, diff=19 ?!
