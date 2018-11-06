@@ -5,7 +5,7 @@ nothing:
 
 update:
 	umask 077; if [ "`id -un`" = "$(USER)" ] ; then git pull; else env -i setuidgid $(USER) git pull; fi
-	chmod -R a=rX COPYING
+	chmod -R a=rX LICENSE
 	chmod 700 *.cgi kgz_zaduzenja.pl .git
 
 publish:
