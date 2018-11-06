@@ -1,4 +1,10 @@
 #!/usr/bin/perl -T
+# Matija Nalis <mnalis-perl@voyager.hr> GPLv3+, started 6.11.2018
+#
+# cron alarmiranje za zaduzenja za posudbe u Knjiznicama Grada Zagreba
+# https://github.com/mnalis/kgz-zaduzenja
+#
+
 use utf8;
 use warnings;
 use strict;
@@ -10,6 +16,7 @@ use WWW::Mechanize;
 use DateTime;
 
 my $WARN_DAYS = 5;
+my $SANE_DAYS = 90;
 my $DEBUG = $ENV{DEBUG} || 0;
 
 binmode STDOUT, ":encoding(UTF-8)";
@@ -63,6 +70,10 @@ foreach my $book (@books) {
 	my $diff_days = ($expire - $now)->delta_days();
 
 	$DEBUG && say "\tnow=" . $now->ymd() . ", istek=" . $expire->ymd() . ", diff=$diff_days";
+
+	if (abs($diff_days) > $SANE_DAYS) {
+		say "WARNING: days $diff_days is too long (>$SANE_DAYS), check for errors or update \$SANE_DAYS";
+	}
 
 	if ($diff_days <= $WARN_DAYS) {
 		if ($diff_days <= 0) {

@@ -1,13 +1,6 @@
 - README.md
 - cronjob (i "make install" / "make uninstall" rules?)
-- use ASP.NET_SessionId kao ARGV param?
-	+ da li timeouta ikad? [da, sutradan vise ne vrijedi :( ]
-	-? da li se brise ako se ulogiramo sa drugim sesionom?
-	+ da li je mozda ovisan o IPu? [nije]
-  - dakle moramo srediti login sa username/pass! (treba li heavy javascript ili postoji zaobilazno rjesenje?)
 
-- FIXMEs u sourceu
 - param za koliko dana unaprijed da se zali (trenutno hardcoded)
-- provjera uspjesnog parsiranja datuma, i sensible checks (da nije za vise xxx dana ili u proslosti itd)
 - stavi da se vrti u cron.daily
-- stavi da zbilja cita sa weba a ne "samples/example.html"
+- obrisi password ASAP iz cmdline i/ili opcija za citanje iz file-a (security)
