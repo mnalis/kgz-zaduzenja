@@ -1,5 +1,4 @@
 - README.md
-- DEBUG poruke print ako je ENV{DEBUG}>0 (i document)
 - cronjob (i "make install" / "make uninstall" rules?)
 - use ASP.NET_SessionId kao ARGV param (da li timeouta ikad [check], ili je mozda ovisan o IPu [nije]), 
   ili probaj srediti login sa username/pass?
