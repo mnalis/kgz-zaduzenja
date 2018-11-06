@@ -1,5 +1,4 @@
 - README.md
-- cronjob (i "make install" / "make uninstall" rules?)
 
 - stavi da se vrti u cron.daily
 -? opcija za citanje passworda iz file-a (security)
