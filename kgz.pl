@@ -73,14 +73,10 @@ die "headers mismatch: wanted: $expect_h, got: $real_h" if $real_h ne $expect_h;
 
 # headers ok, go parse the data
 print "\n\n$real_h\n";
-my @datum_pov= $tree->findvalues( '//table/tbody/tr/td[2]|td[6]');
-use Data::Dumper;
-print "\n\np=" .  Dumper(\@datum_pov) . "\n";
+my @books= $tree->findnodes( '//table/tbody/tr');
 
-#my $link_texts= $p->findvalue( './a'); # the texts of all a elements in $p
-
-#my $nb=$tree->findvalue( '/html/body//p[@class="section_title"]/span[@class="nb"]');
-#my $id=$tree->findvalue( '/html/body//p[@class="section_title"]/@id');
-
-#my $p= $html->findnodes( '//p[@id="toto"]')->[0];
-#my $link_texts= $p->findvalue( './a'); # the texts of all a elements in $p
+foreach my $book (@books) {
+	my @td=$book->findvalues( './td');
+	my ($datum_pos, $datum_pov, $knjiznica, $vrsta, $status, $naslov) = @td;
+	print "$datum_pov\t$naslov\n";
+}
