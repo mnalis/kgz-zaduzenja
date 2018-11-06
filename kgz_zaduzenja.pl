@@ -27,7 +27,6 @@ sub add_cookie ($$) {
 
 my $iskaznica = shift @ARGV;
 my $pin = shift @ARGV;
-
 die "Usage: $0 <broj_iskaznice> <PIN>" if !defined $iskaznica or !defined $pin;
 
 my $mech	= WWW::Mechanize->new( cookie_jar => $cookie_jar );
@@ -54,8 +53,8 @@ $DEBUG > 1 && print $mech->content();
 use HTML::TreeBuilder::XPath;
 my $tree= HTML::TreeBuilder::XPath->new;
 #$tree->parse_content( $mech->content() );
-# FIXME DELME
-open my $fixme_fh, '<:encoding(UTF-8)', './a' || die "Can't open UTF-8 encoded ./a: $!"; $tree->parse_file( $fixme_fh );
+# FIXME DEBUG - DELME
+open my $debug_fh, '<:encoding(UTF-8)', './a' || die "Can't open UTF-8 encoded ./a: $!"; $tree->parse_file( $debug_fh );
 
 
 # check if expected headers match
@@ -73,3 +72,6 @@ foreach my $book (@books) {
 	my ($datum_pos, $datum_pov, $knjiznica, $vrsta, $status, $naslov) = @td;
 	print "$datum_pov\t$naslov\n";
 }
+
+
+exit 0;

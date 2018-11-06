@@ -1,7 +1,11 @@
 - README.md
 - cronjob (i "make install" / "make uninstall" rules?)
-- use ASP.NET_SessionId kao ARGV param (da li timeouta ikad [check], ili je mozda ovisan o IPu [nije]), 
-  ili probaj srediti login sa username/pass?
+- use ASP.NET_SessionId kao ARGV param?
+	- da li timeouta ikad?
+	- da li se brise ako se ulogiramo sa drugim sesionom?
+	+ da li je mozda ovisan o IPu? [nije]
+  - ili probaj srediti login sa username/pass? (treba li heavy javascript ili postoji zaobilazno rjesenje?)
+
 - logout i delete ASP.NET_SessionId (i check da li ne radi vise)
 - FIXME u sourceu
 - param za koliko dana unaprijed da se zali
