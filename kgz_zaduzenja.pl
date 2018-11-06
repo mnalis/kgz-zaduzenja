@@ -16,51 +16,22 @@ binmode STDOUT, ":encoding(UTF-8)";
 binmode STDERR, ":encoding(UTF-8)";
 
 
-my $cookie_jar	= HTTP::Cookies->new;
-
-sub add_cookie ($$) {
-	my ($key, $value) = @_;
-#    	$cookie_jar->set_cookie( $version, $key, $val, $path, $domain, $port, $path_spec, $secure, $maxage, $discard, \%rest )
-#       The set_cookie() method updates the state of the $cookie_jar. The $key, $val, $domain, $port and $path arguments are strings. The $path_spec, $secure, $discard arguments are boolean values. 
-#	The $maxage value is a number indicating number of seconds that this cookie will live. A value <= 0 will delete this cookie. %rest defines various other attributes like "Comment" and "CommentURL".
-
-	$cookie_jar->set_cookie (3, $key, $value, '/',  'katalog.kgz.hr', undef, 1, 0, undef, 1);
-}
-
-
-
 my $iskaznica = shift @ARGV;
 my $pin = shift @ARGV;
 die "Usage: $0 <broj_iskaznice> <PIN>" if !defined $iskaznica or !defined $pin;
 
-my $mech	= WWW::Mechanize->new( cookie_jar => $cookie_jar );
+my $mech	= WWW::Mechanize->new();
 
 my $auth_url = 'https://katalog.kgz.hr/include/globalAjax.aspx?action=logMeIn&brojIskaznice=' . $iskaznica . '&pin=' . $pin . '&random=' . rand();
 $mech->get( $auth_url );
 $DEBUG > 1 && say "Auth login $auth_url: " . $mech->content();
 
-#add_cookie ('ASP.NET_SessionId', 'ASP.NET_SessionId=elao2vi3thecou4ilfsekups');	# FIXME hardcoded? pass in @ARGV, or try autologin with $iskaznica / $pin ?
-#add_cookie ('patronid', $iskaznica);
-#add_cookie ('pin', $pin);
-
 $DEBUG > 1 && say "Cookie Jar:\n", $mech->cookie_jar->as_string;
 
 
-my $url = "https://katalog.kgz.hr/pages/mojaStranica.aspx";
-#FIXME reenable -- 
-$mech->post($url, [ 'action' => 'getIspis', 'action2' => 'getZaduzenja']);
-#$mech->get( $url );
+my $dug_url = "https://katalog.kgz.hr/pages/mojaStranica.aspx";
+$mech->post($dug_url, [ 'action' => 'getIspis', 'action2' => 'getZaduzenja']);
 $DEBUG > 2 && say $mech->content();
-
-#$mech->submit_form(
-#		strict_forms => 1, 
-#		form_id	=> 'form1',
-#		fields	=> { txtBrojIskaznice  => $iskaznica, txtPin => $pin },
-#            button    => 'btnLogin'
-#        );
-
-#$DEBUG > 2 && say $mech->content();
-
 
 use HTML::TreeBuilder::XPath;
 my $tree= HTML::TreeBuilder::XPath->new;
