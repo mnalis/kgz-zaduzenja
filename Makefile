@@ -26,5 +26,7 @@ uninstall:
 	@echo
 	@echo "Remember to remove $(SCRIPT) from 'crontab -e'"
 
+clean:
+	find . -iname "*~" -delete
 
-.PHONY: nothing update publish install uninstall
+.PHONY: nothing update publish install uninstall clean
