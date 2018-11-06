@@ -42,8 +42,9 @@ $DEBUG > 2 && say $mech->content();
 
 use HTML::TreeBuilder::XPath;
 my $tree= HTML::TreeBuilder::XPath->new;
-$tree->parse_content( $mech->content() );
-# DEBUG -- open my $debug_fh, '<:encoding(UTF-8)', './samples/example.html' || die "Can't open UTF-8 encoded ./a: $!"; $tree->parse_file( $debug_fh );
+#$tree->parse_content( $mech->content() );
+# DEBUG -- 
+open my $debug_fh, '<:encoding(UTF-8)', './samples/example.html' || die "Can't open UTF-8 encoded ./a: $!"; $tree->parse_file( $debug_fh );
 
 
 # check if expected headers match
@@ -59,7 +60,6 @@ my @books= $tree->findnodes( '//table/tbody/tr');
 my $now = DateTime->now;
 
 
-
 foreach my $book (@books) {
 	my @td=$book->findvalues( './td');
 	my ($datum_pos, $datum_pov, $knjiznica, $vrsta, $status, $naslov) = @td;
@@ -67,7 +67,7 @@ foreach my $book (@books) {
 	if ($datum_pov !~ m/^(\d{1,2})\.(\d{1,2})\.(\d{4})\.$/) { die "invalid date: $datum_pov"; }
 
 	my $expire = DateTime->new( day => $1, month => $2, year => $3 );
-	my $diff_days = ($expire - $now)->delta_days();
+	my $diff_days = ($expire - $now)->in_units( 'days' );
 
 	$DEBUG && say "\tnow=" . $now->ymd() . ", istek=" . $expire->ymd() . ", diff=$diff_days";
 
@@ -77,7 +77,7 @@ foreach my $book (@books) {
 
 	if ($diff_days <= $WARN_DAYS) {
 		if ($diff_days <= 0) {
-			say "ERROR: pred $diff_days dana (" . $expire->ymd() . ") JE ISTEKLA knjiga:\t$naslov";
+			say "ERROR: prije $diff_days dana (" . $expire->ymd() . ") JE ISTEKLA knjiga:\t$naslov";
 		} else {
 			say "WARNING: za $diff_days dana (" . $expire->ymd() . ") istjece knjiga:\t$naslov";
 		}
