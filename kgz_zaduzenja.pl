@@ -8,10 +8,12 @@ use HTTP::Cookies;
 use WWW::Mechanize;
 use DateTime;
 
+my $WARN_DAYS = 5;
+my $DEBUG = $ENV{DEBUG} || 0;
+
 binmode STDOUT, ":encoding(UTF-8)";
 binmode STDERR, ":encoding(UTF-8)";
 
-my $DEBUG = $ENV{DEBUG} || 0;
 
 my $cookie_jar	= HTTP::Cookies->new;
 
@@ -36,7 +38,7 @@ add_cookie ('ASP.NET_SessionId', 'qukhyk0cma0rovbciwzyyyf0');	# FIXME hardcoded?
 #add_cookie ('patronid', $iskaznica);
 #add_cookie ('pin', $pin);
 
-$DEBUG && print "Cookie Jar:\n", $mech->cookie_jar->as_string, "\n";
+$DEBUG > 1 && print "Cookie Jar:\n", $mech->cookie_jar->as_string, "\n";
 
 
 my $url = "https://katalog.kgz.hr/pages/mojaStranica.aspx";
@@ -48,7 +50,7 @@ my $url = "https://katalog.kgz.hr/pages/mojaStranica.aspx";
 ##            button    => 'btnLogin'
 #        );
 
-$DEBUG > 1 && print $mech->content();
+$DEBUG > 2 && print $mech->content();
 
 
 use HTML::TreeBuilder::XPath;
@@ -75,15 +77,21 @@ my $now = DateTime->now;
 foreach my $book (@books) {
 	my @td=$book->findvalues( './td');
 	my ($datum_pos, $datum_pov, $knjiznica, $vrsta, $status, $naslov) = @td;
-	print "$datum_pov\t$naslov\n";
+	$DEBUG && print "checking: $datum_pov\t$naslov\n";
 	if ($datum_pov !~ m/^(\d{1,2})\.(\d{1,2})\.(\d{4})\.$/) { die "invalid date: $datum_pov"; }
 
 	my $expire = DateTime->new( day => $1, month => $2, year => $3 );
 	my $diff_days = ($expire - $now)->delta_days();
 
-	print "\tnow=" . $now->ymd() . ", istek=" . $expire->ymd() . ", diff=$diff_days\n";
+	$DEBUG && print "\tnow=" . $now->ymd() . ", istek=" . $expire->ymd() . ", diff=$diff_days\n";
 
-
+	if ($diff_days <= $WARN_DAYS) {
+		if ($diff_days <= 0) {
+			print "ERROR: pred $diff_days dana (" . $expire->ymd() . ") JE ISTEKLA knjiga:\t$naslov\n";
+		} else {
+			print "WARNING: za $diff_days dana (" . $expire->ymd() . ") istjece knjiga:\t$naslov\n";
+		}
+	}
 }
 
 
