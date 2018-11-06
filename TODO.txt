@@ -1,6 +1,5 @@
 - README.md
 - cronjob (i "make install" / "make uninstall" rules?)
 
-- param za koliko dana unaprijed da se zali (trenutno hardcoded)
 - stavi da se vrti u cron.daily
-- obrisi password ASAP iz cmdline i/ili opcija za citanje iz file-a (security)
+-? opcija za citanje passworda iz file-a (security)

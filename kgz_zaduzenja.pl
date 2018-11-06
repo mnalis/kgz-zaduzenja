@@ -15,18 +15,20 @@ use HTTP::Cookies;
 use WWW::Mechanize;
 use DateTime;
 
-my $WARN_DAYS = 5;
 my $SANE_DAYS = 90;
 my $DEBUG = $ENV{DEBUG} || 0;
 
 binmode STDOUT, ":encoding(UTF-8)";
 binmode STDERR, ":encoding(UTF-8)";
 
-
 my $iskaznica = shift @ARGV;
 my $pin = shift @ARGV;
-die "Usage: $0 <broj_iskaznice> <PIN>" if !defined $iskaznica or !defined $pin;
+my $WARN_DAYS = shift @ARGV || 5;
+die "Usage: $0 <broj_iskaznice> <PIN> [WARN_DAYS]" if !defined $iskaznica or !defined $pin;
 
+$0="kgz_zaduzenja.pl";	# clear password from commandline for security (NOTE:there is still a small window of time while it can be seen in ps(1))
+
+$DEBUG && say "WARN_DAYS=$WARN_DAYS SANE_DAYS=$SANE_DAYS";
 my $mech	= WWW::Mechanize->new();
 
 my $auth_url = 'https://katalog.kgz.hr/include/globalAjax.aspx?action=logMeIn&brojIskaznice=' . $iskaznica . '&pin=' . $pin . '&random=' . rand();
