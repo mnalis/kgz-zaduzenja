@@ -35,7 +35,7 @@ die "Usage: $0 <broj_iskaznice> <PIN>" if !defined $iskaznica or !defined $pin;
 my $mech	= WWW::Mechanize->new( cookie_jar => $cookie_jar );
 
 #$cookie_jar->load("cookies.txt");
-add_cookie ('ASP.NET_SessionId', 'qukhyk0cma0rovbciwzyyyf0');
+add_cookie ('ASP.NET_SessionId', 'qukhyk0cma0rovbciwzyyyf0');	# FIXME hardcoded? pass in @ARGV, or try autologin with $iskaznica / $pin ?
 #add_cookie ('patronid', $iskaznica);
 #add_cookie ('pin', $pin);
 
