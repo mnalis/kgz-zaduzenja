@@ -57,7 +57,7 @@ die "headers mismatch: wanted: $expect_h, got: $real_h" if $real_h ne $expect_h;
 $DEBUG && say "\n\n$real_h";
 my @books= $tree->findnodes( '//table/tbody/tr');
 
-my $now = DateTime->now;
+my $now = DateTime->today;
 
 
 foreach my $book (@books) {
@@ -67,7 +67,8 @@ foreach my $book (@books) {
 	if ($datum_pov !~ m/^(\d{1,2})\.(\d{1,2})\.(\d{4})\.$/) { die "invalid date: $datum_pov"; }
 
 	my $expire = DateTime->new( day => $1, month => $2, year => $3 );
-	my $diff_days = ($expire - $now)->in_units( 'days' );
+	my $diff_days = $expire->clone()->delta_days($now);			# NB DateTime really sucks, as it can't convert months to hours, so $expire-$now will silently return wrong results!
+	$diff_days = $diff_days->in_units('days') * ($now>$expire ? -1 : 1);	# NB DateTime::Duration also sucks as it always returns positive results... Be extra extra careful with big test suite to see it actually works
 
 	$DEBUG && say "\tnow=" . $now->ymd() . ", istek=" . $expire->ymd() . ", diff=$diff_days";
 
