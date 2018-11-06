@@ -6,6 +6,7 @@ use utf8;
 
 use HTTP::Cookies;
 use WWW::Mechanize;
+use DateTime;
 
 binmode STDOUT, ":encoding(UTF-8)";
 binmode STDERR, ":encoding(UTF-8)";
@@ -39,7 +40,7 @@ $DEBUG && print "Cookie Jar:\n", $mech->cookie_jar->as_string, "\n";
 
 
 my $url = "https://katalog.kgz.hr/pages/mojaStranica.aspx";
-$mech->post($url, [ 'action' => 'getIspis', 'action2' => 'getZaduzenja']);
+#FIXME reenable -- $mech->post($url, [ 'action' => 'getIspis', 'action2' => 'getZaduzenja']);
 
 #$mech->submit_form(
 #		form_id	=> 'form1',
@@ -54,7 +55,7 @@ use HTML::TreeBuilder::XPath;
 my $tree= HTML::TreeBuilder::XPath->new;
 #$tree->parse_content( $mech->content() );
 # FIXME DEBUG - DELME
-open my $debug_fh, '<:encoding(UTF-8)', './a' || die "Can't open UTF-8 encoded ./a: $!"; $tree->parse_file( $debug_fh );
+open my $debug_fh, '<:encoding(UTF-8)', './samples/example.html' || die "Can't open UTF-8 encoded ./a: $!"; $tree->parse_file( $debug_fh );
 
 
 # check if expected headers match
@@ -67,10 +68,22 @@ die "headers mismatch: wanted: $expect_h, got: $real_h" if $real_h ne $expect_h;
 $DEBUG && print "\n\n$real_h\n";
 my @books= $tree->findnodes( '//table/tbody/tr');
 
+my $now = DateTime->now;
+
+
+
 foreach my $book (@books) {
 	my @td=$book->findvalues( './td');
 	my ($datum_pos, $datum_pov, $knjiznica, $vrsta, $status, $naslov) = @td;
 	print "$datum_pov\t$naslov\n";
+	if ($datum_pov !~ m/^(\d{1,2})\.(\d{1,2})\.(\d{4})\.$/) { die "invalid date: $datum_pov"; }
+
+	my $expire = DateTime->new( day => $1, month => $2, year => $3 );
+	my $diff_days = ($expire - $now)->delta_days();
+
+	print "\tnow=" . $now->ymd() . ", istek=" . $expire->ymd() . ", diff=$diff_days\n";
+
+
 }
 
 
