@@ -8,3 +8,4 @@
 - param za koliko dana unaprijed da se zali
 - provjera uspjesnog parsiranja datuma, i sensible checks (da nije za vise xxx dana ili u proslosti itd)
 - stavi da se vrti u cron.daily
+- stavi da zbilja cita sa weba a ne "./a"
