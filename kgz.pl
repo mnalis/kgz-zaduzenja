@@ -2,9 +2,13 @@
 use warnings;
 use strict;
 use autodie qw(:all);
+use utf8;
 
 use HTTP::Cookies;
 use WWW::Mechanize;
+
+binmode STDOUT, ":encoding(UTF-8)";
+binmode STDERR, ":encoding(UTF-8)";
 
 my $cookie_jar	= HTTP::Cookies->new;
 
@@ -20,6 +24,7 @@ sub add_cookie ($$) {
 	$cookie_jar->set_cookie (3, $key, $value, '/',  'katalog.kgz.hr', undef, 1, 0, undef, 1);
 
 }
+
 
 
 my $iskaznica = shift @ARGV;
@@ -55,13 +60,22 @@ print $mech->content();
 
 use HTML::TreeBuilder::XPath;
 my $tree= HTML::TreeBuilder::XPath->new;
-$tree->parse_content( $mech->content() );
+#$tree->parse_content( $mech->content() );
+# FIXME DELME
+open my $fixme_fh, '<:encoding(UTF-8)', './a' || die "Can't open UTF-8 encoded ./a: $!"; $tree->parse_file( $fixme_fh );
 
 
+# check if expected headers match
 my @head= $tree->findvalues( '//table/thead/tr/th');
-my @data= $tree->findvalues( '//table/tbody/tr/td');
+my $real_h = join (':', @head);
+my $expect_h = "Datum posudbe:Datum povrata:Knjižnica:Vrsta građe:Status:Naslovni niz";
+die "headers mismatch: wanted: $expect_h, got: $real_h" if $real_h ne $expect_h;
+
+# headers ok, go parse the data
+print "\n\n$real_h\n";
+my @datum_pov= $tree->findvalues( '//table/tbody/tr/td[2]|td[6]');
 use Data::Dumper;
-print "\n\np=" . Dumper($head[0]) . Dumper(\@data) . "\n";
+print "\n\np=" .  Dumper(\@datum_pov) . "\n";
 
 #my $link_texts= $p->findvalue( './a'); # the texts of all a elements in $p
 
@@ -70,4 +84,3 @@ print "\n\np=" . Dumper($head[0]) . Dumper(\@data) . "\n";
 
 #my $p= $html->findnodes( '//p[@id="toto"]')->[0];
 #my $link_texts= $p->findvalue( './a'); # the texts of all a elements in $p
-
