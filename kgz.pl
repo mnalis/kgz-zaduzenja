@@ -51,3 +51,23 @@ $mech->post($url, [ 'action' => 'getIspis', 'action2' => 'getZaduzenja']);
 #        );
 
 print $mech->content();
+
+
+use HTML::TreeBuilder::XPath;
+my $tree= HTML::TreeBuilder::XPath->new;
+$tree->parse_content( $mech->content() );
+
+
+my @head= $tree->findvalues( '//table/thead/tr/th');
+my @data= $tree->findvalues( '//table/tbody/tr/td');
+use Data::Dumper;
+print "\n\np=" . Dumper($head[0]) . Dumper(\@data) . "\n";
+
+#my $link_texts= $p->findvalue( './a'); # the texts of all a elements in $p
+
+#my $nb=$tree->findvalue( '/html/body//p[@class="section_title"]/span[@class="nb"]');
+#my $id=$tree->findvalue( '/html/body//p[@class="section_title"]/@id');
+
+#my $p= $html->findnodes( '//p[@id="toto"]')->[0];
+#my $link_texts= $p->findvalue( './a'); # the texts of all a elements in $p
+
