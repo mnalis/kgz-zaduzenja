@@ -1,4 +1,5 @@
 - README.md
+- DEBUG poruke print ako je ENV{DEBUG}>0 (i document)
 - cronjob (i "make install" / "make uninstall" rules?)
 - use ASP.NET_SessionId kao ARGV param (da li timeouta ikad [check], ili je mozda ovisan o IPu [nije]), 
   ili probaj srediti login sa username/pass?
@@ -6,4 +7,4 @@
 - FIXME u sourceu
 - param za koliko dana unaprijed da se zali
 - provjera uspjesnog parsiranja datuma, i sensible checks (da nije za vise xxx dana ili u proslosti itd)
-- stavi da se vrti...
+- stavi da se vrti u cron.daily
