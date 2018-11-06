@@ -1,8 +1,9 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -T
+use utf8;
 use warnings;
 use strict;
 use autodie qw(:all);
-use utf8;
+use feature 'say';
 
 use HTTP::Cookies;
 use WWW::Mechanize;
@@ -34,30 +35,37 @@ die "Usage: $0 <broj_iskaznice> <PIN>" if !defined $iskaznica or !defined $pin;
 
 my $mech	= WWW::Mechanize->new( cookie_jar => $cookie_jar );
 
-add_cookie ('ASP.NET_SessionId', 'qukhyk0cma0rovbciwzyyyf0');	# FIXME hardcoded? pass in @ARGV, or try autologin with $iskaznica / $pin ?
+my $auth_url = 'https://katalog.kgz.hr/include/globalAjax.aspx?action=logMeIn&brojIskaznice=' . $iskaznica . '&pin=' . $pin . '&random=' . rand();
+$mech->get( $auth_url );
+$DEBUG > 1 && say "Auth login $auth_url: " . $mech->content();
+
+#add_cookie ('ASP.NET_SessionId', 'ASP.NET_SessionId=elao2vi3thecou4ilfsekups');	# FIXME hardcoded? pass in @ARGV, or try autologin with $iskaznica / $pin ?
 #add_cookie ('patronid', $iskaznica);
 #add_cookie ('pin', $pin);
 
-$DEBUG > 1 && print "Cookie Jar:\n", $mech->cookie_jar->as_string, "\n";
+$DEBUG > 1 && say "Cookie Jar:\n", $mech->cookie_jar->as_string;
 
 
 my $url = "https://katalog.kgz.hr/pages/mojaStranica.aspx";
-#FIXME reenable -- $mech->post($url, [ 'action' => 'getIspis', 'action2' => 'getZaduzenja']);
+#FIXME reenable -- 
+$mech->post($url, [ 'action' => 'getIspis', 'action2' => 'getZaduzenja']);
+#$mech->get( $url );
+$DEBUG > 2 && say $mech->content();
 
 #$mech->submit_form(
+#		strict_forms => 1, 
 #		form_id	=> 'form1',
 #		fields	=> { txtBrojIskaznice  => $iskaznica, txtPin => $pin },
-##            button    => 'btnLogin'
+#            button    => 'btnLogin'
 #        );
 
-$DEBUG > 2 && print $mech->content();
+#$DEBUG > 2 && say $mech->content();
 
 
 use HTML::TreeBuilder::XPath;
 my $tree= HTML::TreeBuilder::XPath->new;
-#$tree->parse_content( $mech->content() );
-# FIXME DEBUG - DELME
-open my $debug_fh, '<:encoding(UTF-8)', './samples/example.html' || die "Can't open UTF-8 encoded ./a: $!"; $tree->parse_file( $debug_fh );
+$tree->parse_content( $mech->content() );
+# DEBUG -- open my $debug_fh, '<:encoding(UTF-8)', './samples/example.html' || die "Can't open UTF-8 encoded ./a: $!"; $tree->parse_file( $debug_fh );
 
 
 # check if expected headers match
@@ -67,7 +75,7 @@ my $expect_h = "Datum posudbe:Datum povrata:Knjižnica:Vrsta građe:Status:Naslo
 die "headers mismatch: wanted: $expect_h, got: $real_h" if $real_h ne $expect_h;
 
 # headers ok, go parse the data
-$DEBUG && print "\n\n$real_h\n";
+$DEBUG && say "\n\n$real_h";
 my @books= $tree->findnodes( '//table/tbody/tr');
 
 my $now = DateTime->now;
@@ -77,19 +85,19 @@ my $now = DateTime->now;
 foreach my $book (@books) {
 	my @td=$book->findvalues( './td');
 	my ($datum_pos, $datum_pov, $knjiznica, $vrsta, $status, $naslov) = @td;
-	$DEBUG && print "checking: $datum_pov\t$naslov\n";
+	$DEBUG && say "checking: $datum_pov\t$naslov";
 	if ($datum_pov !~ m/^(\d{1,2})\.(\d{1,2})\.(\d{4})\.$/) { die "invalid date: $datum_pov"; }
 
 	my $expire = DateTime->new( day => $1, month => $2, year => $3 );
 	my $diff_days = ($expire - $now)->delta_days();
 
-	$DEBUG && print "\tnow=" . $now->ymd() . ", istek=" . $expire->ymd() . ", diff=$diff_days\n";
+	$DEBUG && say "\tnow=" . $now->ymd() . ", istek=" . $expire->ymd() . ", diff=$diff_days";
 
 	if ($diff_days <= $WARN_DAYS) {
 		if ($diff_days <= 0) {
-			print "ERROR: pred $diff_days dana (" . $expire->ymd() . ") JE ISTEKLA knjiga:\t$naslov\n";
+			say "ERROR: pred $diff_days dana (" . $expire->ymd() . ") JE ISTEKLA knjiga:\t$naslov";
 		} else {
-			print "WARNING: za $diff_days dana (" . $expire->ymd() . ") istjece knjiga:\t$naslov\n";
+			say "WARNING: za $diff_days dana (" . $expire->ymd() . ") istjece knjiga:\t$naslov";
 		}
 	}
 }
