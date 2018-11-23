@@ -64,8 +64,9 @@ my $now = DateTime->today;
 foreach my $book (@books) {
 	my @td=$book->findvalues( './td');
 	my ($datum_pos, $datum_pov, $knjiznica, $vrsta, $status, $naslov) = @td;
+	$DEBUG > 1 && say "parsed:\n\t$datum_pos\n\t$datum_pov\n\t$knjiznica\n\t$vrsta\n\t$status\n\t$naslov";
+	if ($datum_pov =~ m/^(\d{1,2})\.(\d{1,2})\.(\d{4})\./) { $datum_pov = $1 } else { die "invalid date: $datum_pov"; }
 	$DEBUG && say "checking: $datum_pov\t$naslov";
-	if ($datum_pov !~ m/^(\d{1,2})\.(\d{1,2})\.(\d{4})\.$/) { die "invalid date: $datum_pov"; }
 
 	my $expire = DateTime->new( day => $1, month => $2, year => $3 );
 	my $diff_days = $expire->clone()->delta_days($now);			# NB DateTime really sucks, as it can't convert months to hours, so $expire-$now will silently return wrong results!
