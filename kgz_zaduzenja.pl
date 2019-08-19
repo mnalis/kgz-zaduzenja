@@ -32,14 +32,15 @@ $DEBUG && say "WARN_DAYS=$WARN_DAYS SANE_DAYS=$SANE_DAYS";
 my $mech	= WWW::Mechanize->new();
 
 my $auth_url = 'https://katalog.kgz.hr/include/globalAjax.aspx?action=logMeIn&brojIskaznice=' . $iskaznica . '&pin=' . $pin . '&random=' . rand();
+$mech->add_header ('Referer' => 'https://katalog.kgz.hr/pages/search.aspx');
 $mech->get( $auth_url );
-$DEBUG > 1 && say "Auth login $auth_url: " . $mech->content();
+$DEBUG > 1 && say "Auth login $auth_url (" . $mech->status() . ' ' . $mech->res()->message . ') ' . $mech->content_type() . ': >' . $mech->content() . '<';
 
 $DEBUG > 1 && say "Cookie Jar:\n", $mech->cookie_jar->as_string;
 
 
-my $dug_url = "https://katalog.kgz.hr/pages/mojaStranica.aspx";
-$mech->post($dug_url, [ 'action' => 'getIspis', 'action2' => 'getZaduzenja']);
+my $zaduzenja_url = 'https://katalog.kgz.hr/pages/mojaStranica.aspx';
+$mech->post($zaduzenja_url, [ 'action' => 'getIspis', 'action2' => 'getZaduzenja']);
 $DEBUG > 2 && say $mech->content();
 
 use HTML::TreeBuilder::XPath;
