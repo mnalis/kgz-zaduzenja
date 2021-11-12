@@ -52,7 +52,7 @@ $tree->parse_content( $mech->content() );
 # check if expected headers match
 my @head= $tree->findvalues( '//table/thead/tr/th');
 my $real_h = join (':', @head);
-my $expect_h = "Datum posudbe:Datum povrata:Knjižnica:Vrsta građe:Status:Naslovni niz";
+my $expect_h = "Posuđeno:Datum povrata:Knjižnica:Građa:Status:Naslov";
 die "headers mismatch: wanted: $expect_h, got: $real_h" if $real_h ne $expect_h;
 
 # headers ok, go parse the data
