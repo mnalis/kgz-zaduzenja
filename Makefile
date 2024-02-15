@@ -19,7 +19,7 @@ install:
 	install -o root -g root -m 755 kgz_zaduzenja.pl $(SCRIPT)
 	@echo
 	@echo "Remember to setup 'crontab -e' like this:"
-	@echo "15 1 * * *	$(SCRIPT) MY_ID MY_PIN WARN_DAYS"
+	@echo "15 1 * * *	$(SCRIPT) MY_EMAIL MY_PASSWORD WARN_DAYS"
 
 uninstall:
 	rm -f $(SCRIPT)
