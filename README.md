@@ -1,3 +1,6 @@
+# nefunkcionalno od cca 12/2023
+ova scripta trenutno ne radi, jer se zaduženja sada mogu pratiti samo kroz PWA aplikaciju https://katalog.kgz.hr/eZaKi/
+
 # kgz-zaduzenja
 Podsjetnik na zaduženja knjiga u Knjižnicama grada Zagreba
 
