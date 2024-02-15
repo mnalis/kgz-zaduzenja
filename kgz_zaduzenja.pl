@@ -21,27 +21,40 @@ my $DEBUG = $ENV{DEBUG} || 0;
 binmode STDOUT, ":encoding(UTF-8)";
 binmode STDERR, ":encoding(UTF-8)";
 
-my $iskaznica = shift @ARGV;
-my $pin = shift @ARGV;
+my $email = shift @ARGV;
+my $lozinka = shift @ARGV;
 my $WARN_DAYS = shift @ARGV || 5;
-die "Usage: $0 <broj_iskaznice> <PIN> [WARN_DAYS]" if !defined $iskaznica or !defined $pin;
+die "Usage: $0 <email> <password> [WARN_DAYS]" if !defined $email or !defined $lozinka;
 
 $0="kgz_zaduzenja.pl";	# clear password from commandline for security (NOTE:there is still a small window of time while it can be seen in ps(1))
 
 $DEBUG && say "WARN_DAYS=$WARN_DAYS SANE_DAYS=$SANE_DAYS";
 my $mech	= WWW::Mechanize->new();
 
-my $auth_url = 'https://katalog.kgz.hr/include/globalAjax.aspx?action=logMeIn&brojIskaznice=' . $iskaznica . '&pin=' . $pin . '&random=' . rand();
-$mech->add_header ('Referer' => 'https://katalog.kgz.hr/pages/search.aspx');
+my $auth_url = 'https://katalog.kgz.hr/eZaKi/Login';
+#$mech->add_header ('Referer' => 'https://katalog.kgz.hr/eZaKi/');
 $mech->get( $auth_url );
-$DEBUG > 1 && say "Auth login $auth_url (" . $mech->status() . ' ' . $mech->res()->message . ') ' . $mech->content_type() . ': >' . $mech->content() . '<';
+$DEBUG > 2 && say "Auth login1 $auth_url (" . $mech->status() . ' ' . $mech->res()->message . ') ' . $mech->content_type() . ': >' . $mech->content() . '<';
+$DEBUG > 3 && say "Cookie Jar1:\n", $mech->cookie_jar->as_string;
 
-$DEBUG > 1 && say "Cookie Jar:\n", $mech->cookie_jar->as_string;
+$mech->submit_form (
+	form_number => 1, 
+	fields => {
+		 'ctl00$MainContent$Email' => $email,
+		 'ctl00$MainContent$Password' => $lozinka
+	},
+	button => 'ctl00$MainContent$btnLogIn'
+);
 
+$DEBUG > 2 && say "Auth login2 $auth_url (" . $mech->status() . ' ' . $mech->res()->message . ') ' . $mech->content_type() . ': >' . $mech->content() . '<';
+$DEBUG > 3 && say "Cookie Jar2:\n", $mech->cookie_jar->as_string;
 
-my $zaduzenja_url = 'https://katalog.kgz.hr/pages/mojaStranica.aspx';
-$mech->post($zaduzenja_url, [ 'action' => 'getIspis', 'action2' => 'getZaduzenja']);
-$DEBUG > 2 && say $mech->content();
+my $zaduzenja_url = 'https://katalog.kgz.hr/eZaKi/zaduzenja';
+$mech->add_header ('Referer' => 'https://katalog.kgz.hr/eZaKi/Home');
+$mech->get( $zaduzenja_url );
+$DEBUG > 4 && say "Auth login3 $zaduzenja_url Zaduzenja: " . $mech->content();
+$DEBUG > 3 && say "Cookie Jar3:\n", $mech->cookie_jar->as_string;
+
 
 use HTML::TreeBuilder::XPath;
 my $tree= HTML::TreeBuilder::XPath->new;
@@ -52,11 +65,13 @@ $tree->parse_content( $mech->content() );
 # check if expected headers match
 my @head= $tree->findvalues( '//table/thead/tr/th');
 my $real_h = join (':', @head);
-my $expect_h = "Posuđeno:Datum povrata:Knjižnica:Građa:Status:Naslov";
+
+# OLD my $expect_h = "Posuđeno:Datum povrata:Knjižnica:Građa:Status:Naslov";
+my $expect_h = "Povrat:Naslov:Knjižnica:Građa:Posuđeno";
 die "headers mismatch: wanted: $expect_h, got: $real_h" if $real_h ne $expect_h;
 
 # headers ok, go parse the data
-$DEBUG && say "\n\n$real_h";
+$DEBUG > 1 && say "\n\n$real_h";
 my @books= $tree->findnodes( '//table/tbody/tr');
 
 my $now = DateTime->today;
@@ -64,8 +79,11 @@ my $now = DateTime->today;
 
 foreach my $book (@books) {
 	my @td=$book->findvalues( './td');
-	my ($datum_pos, $datum_pov, $knjiznica, $vrsta, $status, $naslov) = @td;
-	$DEBUG > 1 && say "parsed:\n\t$datum_pos\n\t$datum_pov\n\t$knjiznica\n\t$vrsta\n\t$status\n\t$naslov";
+	#old $expect_h = "Posuđeno:Datum povrata:Knjižnica:Građa:Status:Naslov";
+	#my ($datum_pos, $datum_pov, $knjiznica, $vrsta, $status, $naslov) = @td;
+	#new $expect_h = "Povrat:Naslov:Knjižnica:Građa:Posuđeno";
+	my ($datum_pov, $naslov, $knjiznica, $vrsta, $datum_pos ) = @td;
+	$DEBUG > 1 && say "parsed:\n\t$datum_pos\n\t$datum_pov\n\t$knjiznica\n\t$vrsta\n\t$naslov";
 	if ($datum_pov =~ m/^(\d{1,2})\.(\d{1,2})\.(\d{4})\./) { $datum_pov = "$1.$2.$3." } else { die "invalid date: $datum_pov"; }
 	$DEBUG && say "checking: $datum_pov\t$naslov";
 
